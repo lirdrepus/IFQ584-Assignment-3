@@ -4,7 +4,7 @@ public class HistoryEngine {
     private List<Move> moveHistory;
     private List<Move> redoHistory;
 
-    public RecordMove(Piece piece,Player player, int boardNumber,Point position){
+    public void RecordMove(Piece piece,Player player, int boardNumber,Point position){
         //TODO: Redo history should be flushed whenever a new move is recorded here?
         Move newMove = MoveFactory(piece,player,boardNumber,position);
         moveHistory.Add(move);

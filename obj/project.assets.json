@@ -13,11 +13,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\nin\\OOPA1\\OOPA1.csproj",
+      "projectUniqueName": "C:\\Users\\nin\\OOPA2\\IFQ584-Assignment-3\\OOPA1.csproj",
       "projectName": "OOPA1",
-      "projectPath": "C:\\Users\\nin\\OOPA1\\OOPA1.csproj",
+      "projectPath": "C:\\Users\\nin\\OOPA2\\IFQ584-Assignment-3\\OOPA1.csproj",
       "packagesPath": "C:\\Users\\nin\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\nin\\OOPA1\\obj\\",
+      "outputPath": "C:\\Users\\nin\\OOPA2\\IFQ584-Assignment-3\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "C:\\Users\\nin\\AppData\\Roaming\\NuGet\\NuGet.Config"

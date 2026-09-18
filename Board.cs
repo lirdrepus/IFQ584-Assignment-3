@@ -5,9 +5,11 @@ public class Board {
     private int maxSpace; //The last space on the board, is always boardSize*boardSize
     private int[,] boardState; //Multidimensional Array of what pieces are on the board, this also doubles for tracking all board positions
     private int[] pieces; //Array of pieces that are NOT on the board, these are moved to boardstate
+    private bool isLive; //Wether the board is still live for multi-board games such as Notakto
     public int BoardSize {get {return boardSize;}}
     public int[] Pieces {get {return pieces;}}
     public int MaxSpace {get {return maxSpace;}}
+    public bool IsLive {get {return isLive;} set{IsLive = value;}}
     public Board(int n){ // Constructor for board, n is entered size of board
         boardSize = n; 
         maxSpace = n * n; // Maxspace is calculated
