@@ -9,7 +9,7 @@ public class Board {
     public int BoardSize {get {return boardSize;}}
     public int[] Pieces {get {return pieces;}}
     public int MaxSpace {get {return maxSpace;}}
-    public bool IsLive {get {return isLive;} set{IsLive = value;}}
+    public bool IsLive {get {return isLive;} set{isLive = value;}}
     public Board(int n){ // Constructor for board, n is entered size of board
         boardSize = n; 
         maxSpace = n * n; // Maxspace is calculated

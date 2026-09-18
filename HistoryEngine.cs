@@ -5,9 +5,9 @@ public class HistoryEngine {
     private List<Move> redoHistory;
 
     public void RecordMove(Piece piece,Player player, int boardNumber,Point position){
-        //TODO: Redo history should be flushed whenever a new move is recorded here?
         Move newMove = MoveFactory(piece,player,boardNumber,position);
-        moveHistory.Add(move);
+        moveHistory.Add(newMove);
+        redoHistory.Clear(); //Anything in redo is outdated now so is flushed
     }
 
 
@@ -16,11 +16,11 @@ public class HistoryEngine {
         return newMove;
     }
 
-    public Undo(){ //Performs an Undo on given list of boards. (Or boards should already be in this objecrt?)
+    public Undo(List<Board> boardList){ //Performs an Undo on given list of boards. (Or boards should already be in this object?)
         Move lastMove = moveHistory[^1];
         //TODO: Throw exception here if no move found
         Board board = boardList[lastMove.BoardNumber - 1];//? Depends How boardlist is implemented
-        board.RemovePiece(lastMove.piece);
+        board.RemovePiece(lastMove.MyPiece);
         //TODO: Check if piece was successfully removed??
         moveHistory.Remove(lastMove);
         redoHistory.Add(lastMove);
@@ -29,11 +29,11 @@ public class HistoryEngine {
 
     }
 
-    public Redo(){
+    public Redo(List<Board> boardList){
         Move redoMove = redoHistory[^1];
         Board board = boardList[lastMove.BoardNumber - 1];
         board.SetPiece(redoMove.piece);
         redoHistory.Remove(redoMove);
-        undoHistory.Add(redoMove);
+        moveHistory.Add(redoMove);
     }
 }
