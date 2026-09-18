@@ -11,7 +11,7 @@ public class HistoryEngine {
     }
 
 
-    private Move MoveFactory(Piece piece,Player player, int boardNumber,Point position){
+    private Move MoveFactory(Piece piece, Player player, int boardNumber,Point position){
         Move newMove = new Move(piece,player,boardNumber,position);
         return newMove;
     }
@@ -36,4 +36,7 @@ public class HistoryEngine {
         redoHistory.Remove(redoMove);
         moveHistory.Add(redoMove);
     }
+
+    //From here, a load from save method could be created that imports all saved moves
+    //Into redoHistory and then loops through a .Count, redoing all the taken moves.
 }
