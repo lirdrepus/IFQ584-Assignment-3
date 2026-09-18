@@ -6,10 +6,10 @@ public class Move {
     private int boardNumber; //Number of board in board list move was performed on
     private Point position; //Position/Coordiante of move
 
-    public Piece MyPiece {get {return myPiece}};
-    public Player MyPlayer {get {return MyPlayer}};
-    public int BoardNumber {get {return boardNumber}};
-    public Point MovePosition {get {return movePosition}};
+    public Piece MyPiece {get {return myPiece;}}
+    public Player MyPlayer {get {return myPlayer;}}
+    public int BoardNumber {get {return boardNumber;}}
+    public Point MovePosition {get {return position;}}
 
     public Move(Piece piece,Player player, int boardNumber,Point position){
         myPiece = piece;                     //Constructor for move object

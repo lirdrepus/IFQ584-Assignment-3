@@ -1,4 +1,5 @@
 using System;
+
 using System.Drawing;
 public class Board {
     private int boardSize; //Board size will always be a single int ex. a boardsize 3 makes a 3x3 board
