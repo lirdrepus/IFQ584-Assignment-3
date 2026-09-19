@@ -14,9 +14,9 @@ public class RenderEngine { //Draws the board to the screen so that the user can
             for(int y = 1; y <= board.BoardSize; y++){// Loop over each space
                 Point space = new Point(x,y);
                 string spaceRender = "";
-                int pieceNumber = board.GetPiece(space);
-                spaceRender = pieceNumber.ToString($"D{blankSpace.Length}");
-                if(pieceNumber == 0){
+                Piece piece = board.GetPiece(space);
+                spaceRender = piece.RenderValue; //($"D{blankSpace.Length}");
+                if(piece == null){
                     spaceRender = blankSpace;} //If there is no piece, we catch and insert a default space
                 line = line + ($"  {spaceRender}  ");}
             Console.WriteLine(line);}}
