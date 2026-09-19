@@ -12,9 +12,9 @@ using System;
 using System.Reflection;
 
 [assembly: System.Reflection.AssemblyCompanyAttribute("OOPA1")]
-[assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
+[assembly: System.Reflection.AssemblyConfigurationAttribute("Release")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+298d619215d76df16850baccd80489c64c2beb64")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+38d8fec055cdeb0c007ab9eafaabd98b788a6d4e")]
 [assembly: System.Reflection.AssemblyProductAttribute("OOPA1")]
 [assembly: System.Reflection.AssemblyTitleAttribute("OOPA1")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
