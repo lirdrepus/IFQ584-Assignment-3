@@ -4,6 +4,7 @@ public class NumericalTicTacToeRules : Rules
 {
     private readonly int boardSize;
     private readonly int goal; //Target sum, formula n(n^2+1)/2
+    public override bool CustomBoard => true;
 
     //boardSize comes in from GameFactory/setup, NOT prompted here
     //Rules shouldn't be doing console I/O, that's ConsoleUI's job
@@ -33,9 +34,10 @@ public class NumericalTicTacToeRules : Rules
         return pieces;
     }
 
-    public override Result CheckWin(int boardNumber, Point space)
+    public override Result CheckWin(Move move)
     {
-        Board board = boardList[0]; //NTTT only ever has one board, boardNumber unused
+        Board board = boardList[0];
+        Point space = move.Position;
 
         if (LineWins(board.GetRow(space))) return Result.Win;
         if (LineWins(board.GetColumn(space))) return Result.Win;

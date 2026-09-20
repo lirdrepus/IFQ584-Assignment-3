@@ -3,31 +3,41 @@ using System.Drawing;
 
 public class NotaktoRules : Rules
 {
-    public override List<Board> BoardFactory()
-    {
-        List<Board> newBoardList = new List<Board>();
-        for (int i = 0; i < 3; i++) //Notakto always uses exactly 3 boards
-        {
-            newBoardList.Add(new Board(3, CreatePieceSet())); //TODO: confirm Board ctor, does each board need its own piece pool, or one shared piece since supply is unlimited?
-        }
-        return newBoardList;
-    }
+    private const int BoardSize = 3;
+    private const int BoardCount = 3;
 
     public NotaktoRules()
     {
         boardList = BoardFactory();
     }
 
-    public override List<Piece> CreatePieceSet()
+    public override List<Board> BoardFactory()
     {
-        //All pieces are the same symbol, not a depleting pool like NTTT.
-        //TODO: confirm with Sean how Board.SetPiece should work for an unlimited-supply piece rather than one drawn from a finite list.
-        return new List<Piece> { new Piece(1, "X") };
+        List<Board> newBoardList = new List<Board>();
+        for (int i = 0; i < BoardCount; i++)
+        {
+            newBoardList.Add(new Board(BoardSize, CreatePieceSet()));
+        }
+        return newBoardList;
     }
 
-    public override Result CheckWin(int boardNumber, Point space)
+    //All pieces are the same symbol, just enough X to fill one board
+    public override List<Piece> CreatePieceSet()
     {
-        Board board = boardList[boardNumber];
+        List<Piece> pieces = new List<Piece>();
+        for (int i = 0; i < BoardSize * BoardSize; i++)
+        {
+            pieces.Add(new Piece(1, "X"));
+        }
+        return pieces;
+    }
+
+
+    public override Result CheckWin(Move move)
+    {
+        Board board = boardList[move.BoardNumber];
+        Point space = move.Position;
+
         if (!board.IsLive) return Result.NotYet; //dead boards can't be re-checked
 
         bool boardDied = LineFilled(board.GetRow(space))

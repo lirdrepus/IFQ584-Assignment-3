@@ -7,8 +7,9 @@ public abstract class Rules : RulesInterface
 {
     protected List<Board> boardList;
 
-    public abstract Result CheckWin(int boardNumber, Point space);
+    Result CheckWin(Move move);
     public abstract List<Piece> AvailablePieces(int player);
     public abstract List<Piece> CreatePieceSet();
     public abstract List<Board> BoardFactory();
+    public virtual bool CustomBoard => false; //override to true only where board size is user-prompted
 }

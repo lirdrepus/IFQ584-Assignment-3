@@ -3,38 +3,43 @@ using System.Drawing;
 
 public class GomokuRules : Rules
 {
-	private const int WinLength = 5;
-	private readonly int boardSize;
+    private const int BoardSize = 15;
+    private const int WinLength = 5;
 
-	private static readonly (int rowStep, int colStep)[] Directions =
+    private static readonly (int rowStep, int colStep)[] Directions =
 	{
 		(0, 1), (1, 0), (1, 1), (1, -1)
 	};
 
-	public GomokuRules(int boardSize)
-	{
-		this.boardSize = boardSize;
-		boardList = BoardFactory();
-	}
+    public GomokuRules()
+    {
+        boardList = BoardFactory();
+    }
 
-	public override List<Board> BoardFactory()
+    public override List<Board> BoardFactory()
 	{
 		List<Board> newBoardList = new List<Board>();
 		newBoardList.Add(new Board(boardSize, CreatePieceSet()));
 		return newBoardList;
 	}
 
-	public override List<Piece> CreatePieceSet()
-	{
-		//Two unlimited-supply piece types, not a depleting pool.
-		//TODO: same question as Notakto, confirm shape with Sean
-		return new List<Piece> { new Piece(1, "X"), new Piece(2, "O") };
-	}
+    //Two piece types, enough of each to fill the board, X = 0, O = 1, from Sean's message
+    public override List<Piece> CreatePieceSet()
+    {
+        List<Piece> pieces = new List<Piece>();
+        for (int i = 0; i < BoardSize * BoardSize; i++)
+        {
+            pieces.Add(new Piece(0, "X"));
+            pieces.Add(new Piece(1, "O"));
+        }
+        return pieces;
+    }
 
-	public override Result CheckWin(int boardNumber, Point space)
-	{
-		Board board = boardList[0];
-		Piece placed = board.GetPiece(space);
+    public override Result CheckWin(Move move)
+    {
+        Board board = boardList[0];
+        Point space = move.Position;
+        Piece placed = board.GetPiece(space);
 
 		foreach (var (rowStep, colStep) in Directions)
 		{
