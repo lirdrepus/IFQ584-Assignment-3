@@ -37,7 +37,7 @@ public class NumericalTicTacToeRules : Rules
     public override Result CheckWin(Move move)
     {
         Board board = boardList[0];
-        Point space = move.Position;
+        Point space = move.MovePosition;
 
         if (LineWins(board.GetRow(space))) return Result.Win;
         if (LineWins(board.GetColumn(space))) return Result.Win;
@@ -59,7 +59,7 @@ public class NumericalTicTacToeRules : Rules
         int total = 0;
         foreach (Piece piece in line)
         {
-            if (piece.Value == 0) return false; //incomplete line
+            if (piece == null) return false;
             total += piece.Value;
         }
         return total == goal;

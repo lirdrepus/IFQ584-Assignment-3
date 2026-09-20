@@ -36,7 +36,7 @@ public class NotaktoRules : Rules
     public override Result CheckWin(Move move)
     {
         Board board = boardList[move.BoardNumber];
-        Point space = move.Position;
+        Point space = move.MovePosition;
 
         if (!board.IsLive) return Result.NotYet; //dead boards can't be re-checked
 
@@ -56,7 +56,7 @@ public class NotaktoRules : Rules
     {
         foreach (Piece piece in line)
         {
-            if (piece.Value == 0) return false;
+            if (piece == null) return false;
         }
         return true;
     }
