@@ -70,6 +70,6 @@ public class GomokuRules : Rules
 
 	public override List<Piece> AvailablePieces(int player)
 	{
-		return new List<Piece>(); //not applicable, from Sean's message.
+		return new List<Piece>(); //not applicable, from Sean's message
 	}
 }
