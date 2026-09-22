@@ -13,7 +13,15 @@ public class GomokuRules : Rules
 
     public GomokuRules()
     {
-        boardList = BoardFactory();
+        //boardList = BoardFactory();
+    }
+
+    public override string GameName => "Gomoku";
+    public override string GameDescription => "Get five in a row, horizontally, vertically, or diagonally, to win.";
+
+	public override void RulesSetup(int boardSize = 0) // param ignored - board size is fixed
+	{
+		boardList = BoardFactory();
     }
 
     public override List<Board> BoardFactory()

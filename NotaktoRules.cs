@@ -8,6 +8,14 @@ public class NotaktoRules : Rules
 
     public NotaktoRules()
     {
+        //boardList = BoardFactory();
+    }
+
+    public override string GameName => "Notakto";
+    public override string GameDescription => "Three shared 3x3 boards, all pieces are X. Complete three-in-a-row on the last live board and you lose.";
+
+    public override void RulesSetup(int boardSize = 0) // param ignored - board size is fixed
+    {
         boardList = BoardFactory();
     }
 

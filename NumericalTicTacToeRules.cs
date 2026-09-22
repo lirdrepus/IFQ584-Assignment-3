@@ -8,11 +8,21 @@ public class NumericalTicTacToeRules : Rules
 
     //boardSize comes in from GameFactory/setup, NOT prompted here
     //Rules shouldn't be doing console I/O, that's ConsoleUI's job
-    public NumericalTicTacToeRules(int boardSize)
+    /*public NumericalTicTacToeRules(int boardSize)
     {
         this.boardSize = boardSize;
         goal = boardSize * (boardSize * boardSize + 1) / 2;
         boardList = BoardFactory(); //safe: boardSize is already set above
+    }*/
+    public NumericalTicTacToeRules() { } // no longer builds boardList here
+    public override string GameName => "Numerical Tic-Tac-Toe";
+    public override string GameDescription => $"Get a row, column, or diagonal to sum to {goal} to win.";
+
+    public override void RulesSetup(int boardSize = 0)
+    {
+        this.boardSize = boardSize;
+        goal = boardSize * (boardSize * boardSize + 1) / 2;
+        boardList = BoardFactory(); // now called after setup confirms the board size
     }
 
     public override List<Board> BoardFactory()
