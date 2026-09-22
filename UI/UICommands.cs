@@ -21,3 +21,15 @@ public class LoadCommand : UICommand {
         return;
     }
 }
+
+public class UndoCommand : UICommand{
+    public void Execute(){
+        HistoryEngine.Instance?.Undo();
+    }
+}
+
+public class RedoCommand : UICommand{
+    public void Execute(){
+        HistoryEngine.Instance?.Redo();
+    }
+}

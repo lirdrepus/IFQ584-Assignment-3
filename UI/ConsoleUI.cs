@@ -2,6 +2,8 @@ using System.Drawing;
 
 public class ConsoleUI {
     
+
+
     public int PromptInteger(string prompt){ //Allows for caller to give a prompt to player
         bool incomplete = true;    //The argument allows a "prompt" to be displayed to the player
         int chosenNumber = 0;
