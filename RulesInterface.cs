@@ -4,7 +4,7 @@ using System.Drawing;
 
 public interface RulesInterface
 {
-    Result CheckWin(int boardNumber, Point space);
+    Result CheckWin(Move move);
     List<Piece> AvailablePieces(int player);
     List<Piece> CreatePieceSet();
     List<Board> BoardFactory();

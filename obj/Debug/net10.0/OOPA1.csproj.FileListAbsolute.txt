@@ -1,5 +1,0 @@
-G:\QUT\Master of CS\IFQ584\A2\A3\IFQ584_A3\obj\Debug\net10.0\OOPA1.GeneratedMSBuildEditorConfig.editorconfig
-G:\QUT\Master of CS\IFQ584\A2\A3\IFQ584_A3\obj\Debug\net10.0\OOPA1.AssemblyInfoInputs.cache
-G:\QUT\Master of CS\IFQ584\A2\A3\IFQ584_A3\obj\Debug\net10.0\OOPA1.AssemblyInfo.cs
-G:\QUT\Master of CS\IFQ584\A2\A3\IFQ584_A3\obj\Debug\net10.0\OOPA1.csproj.CoreCompileInputs.cache
-G:\QUT\Master of CS\IFQ584\A2\A3\IFQ584_A3\obj\Debug\net10.0\OOPA1.sourcelink.json

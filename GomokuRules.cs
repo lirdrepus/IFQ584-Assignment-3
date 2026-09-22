@@ -19,8 +19,8 @@ public class GomokuRules : Rules
     public override List<Board> BoardFactory()
 	{
 		List<Board> newBoardList = new List<Board>();
-		newBoardList.Add(new Board(boardSize, CreatePieceSet()));
-		return newBoardList;
+        newBoardList.Add(new Board(BoardSize, CreatePieceSet()));
+        return newBoardList;
 	}
 
     //Two piece types, enough of each to fill the board, X = 0, O = 1, from Sean's message
@@ -35,10 +35,11 @@ public class GomokuRules : Rules
         return pieces;
     }
 
-    public override Result CheckWin(int boardNumber, Point space)
-	{
-		Board board = boardList[0];
-		Piece placed = board.GetPiece(space);
+    public override Result CheckWin(Move move)
+    {
+        Board board = boardList[0];
+        Point space = move.MovePosition;
+        Piece placed = board.GetPiece(space);
 
 		foreach (var (rowStep, colStep) in Directions)
 		{
@@ -58,8 +59,9 @@ public class GomokuRules : Rules
 		while (row >= 1 && row <= board.BoardSize && col >= 1 && col <= board.BoardSize)
 		{
 			Point space = new Point(row, col);
-			if (board.GetPiece(space).Value != pieceValue) break;
-			count++;
+            Piece piece = board.GetPiece(space);
+            if (piece == null || piece.Value != pieceValue) break;
+            count++;
 			row += rowStep;
 			col += colStep;
 		}
