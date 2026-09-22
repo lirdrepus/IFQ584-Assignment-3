@@ -7,7 +7,11 @@ public abstract class Rules : RulesInterface
 {
     protected List<Board> boardList;
 
-    Result CheckWin(Move move);
+    public abstract string GameName { get; }
+    public abstract string GameDescription { get; }
+
+    public abstract void RulesSetup(int boardSize = 0);
+    public abstract Result CheckWin(Move move);
     public abstract List<Piece> AvailablePieces(int player);
     public abstract List<Piece> CreatePieceSet();
     public abstract List<Board> BoardFactory();
