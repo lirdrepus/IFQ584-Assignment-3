@@ -22,8 +22,9 @@ public class HumanPlayer : Player
         Point space = PromptForSpace(board);
         int value = PromptForValue(board);
 
-        board.SetPiece(value, space); // your Board commits immediately — there's no separate "confirm" step
-        return new Move(value, space, this, boardIndex);
+        board.SetPiece(value, space);
+        var piece = new Piece(value, value.ToString()); // TODO: confirm renderValue source with Sean
+        return new Move(piece, this, boardIndex, space);
     }
 
     private int PromptForBoard(List<Board> boardList)
@@ -51,7 +52,7 @@ public class HumanPlayer : Player
                 var space = new Point(x, y);
                 try
                 {
-                    board.CheckSpace(space); // throws PointZeroException / SpaceTakenException
+                    board.CheckSpace(space);
                     return space;
                 }
                 catch (PointZeroException)
@@ -64,8 +65,6 @@ public class HumanPlayer : Player
                 }
                 catch (IndexOutOfRangeException)
                 {
-                    // CheckSpace only guards (0,0) and occupied spaces — anything
-                    // outside the board (e.g. x = 10 on a 3x3) surfaces here instead.
                     Console.WriteLine("That space is off the board. Try again.");
                 }
             }
@@ -78,7 +77,7 @@ public class HumanPlayer : Player
 
     private int PromptForValue(Board board)
     {
-        var eligible = Rules.GetEligiblePieces(board, PlayerNumber);
+        var eligible = Rules.AvailablePieces(PlayerNumber);
         while (true)
         {
             Console.Write($"Choose a number ({string.Join(", ", eligible.Select(p => p.Value))}): ");

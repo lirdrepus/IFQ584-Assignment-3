@@ -6,6 +6,7 @@ using System.Collections.Generic;
 public abstract class Rules : RulesInterface
 {
     protected List<Board> boardList;
+    public List<Board> BoardList => boardList;
 
     public abstract string GameName { get; }
     public abstract string GameDescription { get; }

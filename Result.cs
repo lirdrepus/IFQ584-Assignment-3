@@ -1,12 +1,9 @@
 ﻿using System;
 
-public class Result
+public enum Result
 {
-    public enum Result
-    {
-        Win,
-        Loss,
-        Draw,
-        NotYet
-    }
+    Win,
+    Loss,
+    Draw,
+    NotYet
 }

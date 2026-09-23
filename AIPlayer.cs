@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using System.Drawing;
 using System.Collections.Generic;
 
 public class AIPlayer : Player
@@ -11,10 +12,6 @@ public class AIPlayer : Player
         return FindWin(boardList) ?? RandomMove(boardList);
     }
 
-    // Your Board.SetPiece commits immediately — there's no "would this
-    // work?" query — so trialing a move here means actually placing it,
-    // asking Rules what happened, then calling board.RemovePiece to put
-    // it right back before trying the next candidate.
     public Move? FindWin(List<Board> boardList)
     {
         Move? safeFallback = null;
@@ -24,40 +21,38 @@ public class AIPlayer : Player
             var board = boardList[boardIndex];
             if (!board.IsLive) continue;
 
-            var distinctValues = Rules.GetEligiblePieces(board, PlayerNumber)
+            var distinctValues = Rules.AvailablePieces(PlayerNumber)
                                        .Select(p => p.Value)
                                        .Distinct();
 
             foreach (var value in distinctValues)
             {
-                // Snapshot available spaces once — GetAvaliableSpaces() would
-                // otherwise shrink out from under us as we place trial pieces.
                 foreach (var space in board.GetAvaliableSpaces().ToList())
                 {
                     board.SetPiece(value, space);
-                    bool wasLive = board.IsLive; // Rules may flip this (e.g. a misere game) — remember it
+                    bool wasLive = board.IsLive;
 
-                    var candidate = new Move(value, space, this, boardIndex);
-                    var outcome = Rules.EvaluateMove(candidate, board);
+                    var piece = new Piece(value, value.ToString()); // TODO: confirm renderValue source with Sean
+                    var candidate = new Move(piece, this, boardIndex, space);
+                    Result outcome = Rules.CheckWin(candidate);
 
-                    if (outcome == MoveOutcome.MoverWins)
-                        return candidate; // keep this placement as-is — it's the move we're taking, don't revert it
+                    if (outcome == Result.Win)
+                        return candidate;
 
-                    // Not decisive — undo the trial before evaluating the next candidate.
                     board.RemovePiece(space);
                     board.IsLive = wasLive;
 
-                    if (safeFallback == null && Rules.IsFavorableOutcome(outcome))
-                        safeFallback = candidate; // remember the first acceptable move as a fallback
+                    // TODO: "favorable" originally meant something more specific -
+                    // using "not a loss" as the safe-fallback condition for now
+                    if (safeFallback == null && outcome != Result.Loss)
+                        safeFallback = candidate;
                 }
             }
         }
 
         if (safeFallback != null)
         {
-            // The fallback candidate WAS reverted above (we didn't know yet
-            // it would be the one we keep) — re-commit it for real now.
-            boardList[safeFallback.BoardIndex].SetPiece(safeFallback.PieceValue, safeFallback.Position);
+            boardList[safeFallback.BoardNumber].SetPiece(safeFallback.MyPiece.Value, safeFallback.MovePosition);
         }
 
         return safeFallback;
@@ -77,10 +72,11 @@ public class AIPlayer : Player
         var spaces = board.GetAvaliableSpaces();
         var space = spaces[random.Next(spaces.Count)];
 
-        var eligible = Rules.GetEligiblePieces(board, PlayerNumber);
+        var eligible = Rules.AvailablePieces(PlayerNumber);
         var value = eligible[random.Next(eligible.Count)].Value;
 
         board.SetPiece(value, space);
-        return new Move(value, space, this, boardIndex);
+        var piece = new Piece(value, value.ToString());
+        return new Move(piece, this, boardIndex, space);
     }
 }
