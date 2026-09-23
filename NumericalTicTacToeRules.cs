@@ -2,8 +2,8 @@ using System.Drawing;
 
 public class NumericalTicTacToeRules : Rules
 {
-    private readonly int boardSize;
-    private readonly int goal; //Target sum, formula n(n^2+1)/2
+    private int boardSize;
+    private int goal; //Target sum, formula n(n^2+1)/2
     public override bool CustomBoard => true;
 
     //boardSize comes in from GameFactory/setup, NOT prompted here

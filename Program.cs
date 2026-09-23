@@ -1,3 +1,3 @@
 ﻿Console.Clear();
-NumericalTicTacToe ttt = new NumericalTicTacToe();
-ttt.StartGame();
+RulesTests.RunAll();
+Console.WriteLine("Entry point pending GameController wiring - see Sean/Kevin.");

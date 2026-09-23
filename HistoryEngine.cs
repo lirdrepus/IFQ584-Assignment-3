@@ -1,42 +1,55 @@
 using System;
 using System.Drawing;
-public class HistoryEngine {
-    private List<Move> moveHistory;
-    private List<Move> redoHistory;
+using System.Collections.Generic;
 
-    public void RecordMove(Piece piece,Player player, int boardNumber,Point position){
-        Move newMove = MoveFactory(piece,player,boardNumber,position);
+public class HistoryEngine
+{
+    private static HistoryEngine? instance;
+    public static HistoryEngine Instance
+    {
+        get
+        {
+            instance ??= new HistoryEngine();
+            return instance;
+        }
+    }
+
+    private List<Move> moveHistory = new List<Move>();
+    private List<Move> redoHistory = new List<Move>();
+
+    public List<Board>? BoardList { get; set; }
+
+    public void RecordMove(Piece piece, Player player, int boardNumber, Point position)
+    {
+        Move newMove = MoveFactory(piece, player, boardNumber, position);
         moveHistory.Add(newMove);
-        redoHistory.Clear(); //Anything in redo is outdated now so is flushed
+        redoHistory.Clear();
     }
 
-
-    private Move MoveFactory(Piece piece, Player player, int boardNumber,Point position){
-        Move newMove = new Move(piece,player,boardNumber,position);
-        return newMove;
+    private Move MoveFactory(Piece piece, Player player, int boardNumber, Point position)
+    {
+        return new Move(piece, player, boardNumber, position);
     }
 
-    public Undo(List<Board> boardList){ //Performs an Undo on given list of boards. (Or boards should already be in this object?)
+    public bool Undo()
+    {
+        if (BoardList == null || moveHistory.Count == 0) return false;
         Move lastMove = moveHistory[^1];
-        //TODO: Throw exception here if no move found
-        Board board = boardList[lastMove.BoardNumber - 1];//? Depends How boardlist is implemented
-        board.RemovePiece(lastMove.MyPiece);
-        //TODO: Check if piece was successfully removed??
+        Board board = BoardList[lastMove.BoardNumber];
+        board.RemovePiece(lastMove.MovePosition);
         moveHistory.Remove(lastMove);
         redoHistory.Add(lastMove);
-        //^^ There is also a world where we index thru but I think this is more consistent.
-        //TODO: Return undo successful or something
-
+        return true;
     }
 
-    public Redo(List<Board> boardList){
+    public bool Redo()
+    {
+        if (BoardList == null || redoHistory.Count == 0) return false;
         Move redoMove = redoHistory[^1];
-        Board board = boardList[lastMove.BoardNumber - 1];
-        board.SetPiece(redoMove.piece);
+        Board board = BoardList[redoMove.BoardNumber];
+        board.SetPiece(redoMove.MyPiece.Value, redoMove.MovePosition);
         redoHistory.Remove(redoMove);
         moveHistory.Add(redoMove);
+        return true;
     }
-
-    //From here, a load from save method could be created that imports all saved moves
-    //Into redoHistory and then loops through a .Count, redoing all the taken moves.
 }
