@@ -48,15 +48,7 @@ public sealed class GameController
 
     private void ShowBoards()
     {
-        // TODO: Board has no Display()/ToString(), and
-        // RenderEngine.DrawBoard() takes a single Board, not a List<Board>.
-        // Looping here as a stopgap for Notakto's 3 boards.
-        Console.Clear();
-        for (int i = 0; i < session!.Boards.Count; i++)
-        {
-            Console.WriteLine($"--- Board {i + 1} ---"); 
-            new RenderEngine(session.Boards[i]).DrawBoard();
-        }
+        RenderEngine.DrawAll(session!.Boards);
     }
 
     private void PlayTurn()

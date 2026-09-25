@@ -19,4 +19,17 @@ public class RenderEngine { //Draws the board to the screen so that the user can
                 string spaceRender = piece == null ? blankSpace : piece.RenderValue; //If there is no piece, we catch and insert a default space
                 line = line + ($"  {spaceRender}  ");}
             Console.WriteLine(line);}}
+
+    public static void DrawAll(List<Board> boards)
+    {
+        Console.Clear();
+        for (int i = 0; i < boards.Count; i++)
+        {
+            if (boards.Count > 1)
+            {
+                Console.WriteLine($"--- Board {i + 1} ---");
+            }
+            new RenderEngine(boards[i]).DrawBoard();
+        }
+    }
 }
