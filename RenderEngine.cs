@@ -8,16 +8,15 @@ public class RenderEngine { //Draws the board to the screen so that the user can
         for( int x = 0; x < System.Convert.ToString(board.MaxSpace).Length; x++){
             blankSpace = blankSpace + ".";}}
     public void DrawBoard() {
-        Console.Clear();
+        //Console.Clear();
         for(int x = 1; x <= board.BoardSize; x++){ //Loop over each row and draw rows to screen
             string line = System.Convert.ToString(x) + ") "; // Label row
             for(int y = 1; y <= board.BoardSize; y++){// Loop over each space
                 Point space = new Point(x,y);
-                string spaceRender = "";
+                //string spaceRender = "";
                 Piece piece = board.GetPiece(space);
-                spaceRender = piece.RenderValue; //($"D{blankSpace.Length}");
-                if(piece == null){
-                    spaceRender = blankSpace;} //If there is no piece, we catch and insert a default space
+                //spaceRender = piece.RenderValue; //($"D{blankSpace.Length}");
+                string spaceRender = piece == null ? blankSpace : piece.RenderValue; //If there is no piece, we catch and insert a default space
                 line = line + ($"  {spaceRender}  ");}
             Console.WriteLine(line);}}
 }
