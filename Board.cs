@@ -15,7 +15,9 @@ public class Board {
         boardSize = n; 
         maxSpace = n * n; // Maxspace is calculated
         boardState = new Piece[boardSize,boardSize];
-        this.pieces = pieces;}
+        this.pieces = pieces;
+        isLive = true;
+    }
     public void SetPiece(int number, Point space){ //Generic method for setting a piece on the board
         Piece selectedPiece = pieces.Find(delegate(Piece p){
             return p.Value == number;

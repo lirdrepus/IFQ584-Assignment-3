@@ -12,6 +12,24 @@ public class AIPlayer : Player
         return FindWin(boardList) ?? RandomMove(boardList);
     }
 
+    // Notakto/Gomoku don't assign pieces per player (AvailablePieces returns
+    // empty for them) - infer from the pool instead: one distinct value =
+    // shared piece (Notakto's X); two = alternate by player number (Gomoku's X/O).
+    // Same logic as HumanPlayer.PromptForValue(), kept in sync deliberately.
+    private List<int> EligibleValues(Board board)
+    {
+        var eligible = Rules.AvailablePieces(PlayerNumber);
+        if (eligible.Count > 0)
+            return eligible.Select(p => p.Value).Distinct().ToList();
+
+        var distinctValues = board.Pieces.Select(p => p.Value).Distinct().OrderBy(v => v).ToList();
+        if (distinctValues.Count == 0) return distinctValues; // board's piece pool is empty
+
+        return distinctValues.Count == 1
+            ? new List<int> { distinctValues[0] }
+            : new List<int> { distinctValues[(PlayerNumber - 1) % distinctValues.Count] };
+    }
+
     public Move? FindWin(List<Board> boardList)
     {
         Move? safeFallback = null;
@@ -21,9 +39,7 @@ public class AIPlayer : Player
             var board = boardList[boardIndex];
             if (!board.IsLive) continue;
 
-            var distinctValues = Rules.AvailablePieces(PlayerNumber)
-                                       .Select(p => p.Value)
-                                       .Distinct();
+            var distinctValues = EligibleValues(board); // Rules.AvailablePieces(...).Select(...)
 
             foreach (var value in distinctValues)
             {
@@ -32,7 +48,7 @@ public class AIPlayer : Player
                     board.SetPiece(value, space);
                     bool wasLive = board.IsLive;
 
-                    var piece = new Piece(value, value.ToString()); // TODO: confirm renderValue source with Sean
+                    var piece = new Piece(value, value.ToString());
                     var candidate = new Move(piece, this, boardIndex, space);
                     Result outcome = Rules.CheckWin(candidate);
 
@@ -42,8 +58,6 @@ public class AIPlayer : Player
                     board.RemovePiece(space);
                     board.IsLive = wasLive;
 
-                    // TODO: "favorable" originally meant something more specific -
-                    // using "not a loss" as the safe-fallback condition for now
                     if (safeFallback == null && outcome != Result.Loss)
                         safeFallback = candidate;
                 }
@@ -72,8 +86,8 @@ public class AIPlayer : Player
         var spaces = board.GetAvaliableSpaces();
         var space = spaces[random.Next(spaces.Count)];
 
-        var eligible = Rules.AvailablePieces(PlayerNumber);
-        var value = eligible[random.Next(eligible.Count)].Value;
+        var eligibleValues = EligibleValues(board); // Rules.AvailablePieces(...)
+        var value = eligibleValues[random.Next(eligibleValues.Count)];
 
         board.SetPiece(value, space);
         var piece = new Piece(value, value.ToString());

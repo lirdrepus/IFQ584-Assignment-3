@@ -23,7 +23,7 @@ public class HumanPlayer : Player
         int value = PromptForValue(board);
 
         board.SetPiece(value, space);
-        var piece = new Piece(value, value.ToString()); // TODO: confirm renderValue source with Sean
+        var piece = new Piece(value, value.ToString());
         return new Move(piece, this, boardIndex, space);
     }
 
@@ -31,11 +31,11 @@ public class HumanPlayer : Player
     {
         while (true)
         {
-            Console.Write("Choose a board: ");
-            if (int.TryParse(Console.ReadLine(), out int index)
-                && index >= 0 && index < boardList.Count
-                && boardList[index].IsLive)
-                return index;
+            Console.Write($"Choose a board (1-{boardList.Count}): "); 
+            if (int.TryParse(Console.ReadLine(), out int input)
+                && input >= 1 && input <= boardList.Count
+                && boardList[input - 1].IsLive)   
+                return input - 1;
             Console.WriteLine("That board isn't in play. Try again.");
         }
     }
@@ -75,9 +75,21 @@ public class HumanPlayer : Player
         }
     }
 
+    // Notakto/Gomoku don't assign pieces per player (AvailablePieces returns
+    // empty for them) - infer from the pool instead: one distinct value =
+    // shared piece (Notakto's X); two = alternate by player number (Gomoku's X/O).
     private int PromptForValue(Board board)
     {
         var eligible = Rules.AvailablePieces(PlayerNumber);
+
+        if (eligible.Count == 0)
+        {
+            var distinctValues = board.Pieces.Select(p => p.Value).Distinct().OrderBy(v => v).ToList();
+            return distinctValues.Count == 1
+                ? distinctValues[0]
+                : distinctValues[(PlayerNumber - 1) % distinctValues.Count];
+        }
+
         while (true)
         {
             Console.Write($"Choose a number ({string.Join(", ", eligible.Select(p => p.Value))}): ");
