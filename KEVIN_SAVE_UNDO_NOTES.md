@@ -19,8 +19,8 @@ Slack #assignment-3 context used for authorship: Terry (lirdrepus) put the boota
 
 - **`GameStateMapper.cs`** implements `IGameStateMapper` (`Capture` / `Restore`). Restore mirrors `GameFactory`: rules from `GameName`, `RulesSetup`, overlay cells/`IsLive`, players from `PlayerType`, then `CurrentPlayerIndex` / `Outcome`. History stacks are restored best-effort via `HistoryEngine.ReplaceHistory`.
 - **`HistoryEngine`**: `BoardList` is assigned on new game and after load. Added `AppliedMoves` / `RedoMoves`, `ClearHistory`, `ReplaceHistory`. Undo revives `IsLive` on the affected board (Notakto).
-- **`GameController`**: takes `SaveLoadHandler`, owns HELP/SAVE/LOAD/UNDO/REDO. Default file: `save.json`. Undo/redo also adjust `CurrentPlayerIndex` and clear a finished `Outcome` on undo. Terry's play loop (turn, CheckWin, Notakto aggregation, draw) is kept.
-- **`UI/ConsoleUI` + `UI/UICommands`**: Sean's command strategy filled in-place (HELP/SAVE/LOAD/UNDO/REDO registered and implemented). `Bind(GameController)` supplies the session/controller refs. Case-insensitive command matching.
+- **`GameController`**: takes `SaveLoadHandler`, owns HELP/SAVE/LOAD/UNDO/REDO/QUIT. Default file: `save.json`. Undo/redo also adjust `CurrentPlayerIndex` and clear a finished `Outcome` on undo. Start menu offers New game vs Load before setup. Terry's play loop (turn, CheckWin, Notakto aggregation, draw) is kept.
+- **`UI/ConsoleUI` + `UI/UICommands`**: Sean's command strategy filled in-place (HELP/SAVE/LOAD/UNDO/REDO/QUIT registered and implemented). `Bind(GameController)` supplies the session/controller refs. Case-insensitive command matching. QUIT calls `QuitGame` (`Environment.Exit(0)`).
 - **`HumanPlayer`**: every `ReadLine` goes through command interception so typing SAVE/UNDO/HELP mid-turn works without a second menu. LOAD mid-turn throws `SessionReplacedException` so the turn aborts cleanly against the new session. Cecil prompt/validation logic is unchanged.
 - **`Program.cs`**: constructs `GameStateMapper` -> `SaveLoadHandler` -> `GameController`.
 
@@ -30,13 +30,13 @@ Sean owns `UI/ConsoleUI.cs` and `UI/UICommands.cs`. Those files were **not repla
 
 ## Limitations
 
-- **No .NET SDK on this Mac** (`dotnet` not found) when this was written. Code matches current APIs but was not compiled here.
+- **.NET SDK**: prefer `~/Desktop/QUTMASTER/.dotnet` on PATH if system `dotnet` is missing. Build with `dotnet build` from the repo root.
 - **Redo + Notakto `IsLive`**: `HistoryEngine.Redo` only `SetPiece`s; it does not re-run `Rules.CheckWin`, so a redone killing move may leave the board live until a later real move evaluates wins.
 - **Saved move `RenderValue`**: `SavedMoveState` has no render field; restore infers from the board cell or `PieceValue.ToString()`.
-- **LOAD during setup**: sets a pending session; enter any number at the next setup prompt to adopt it (avoids fighting `PromptInteger`). This is a workable path, but not a dedicated "new game vs load" first screen from the Assignment 2 brief.
+- **LOAD during setup**: still sets a pending session; the next setup number adopts it if LOAD is typed mid-setup (avoids fighting `PromptInteger`). The start menu is now the first-class new-vs-load path (1/NEW or 2/LOAD); missing/invalid save stays on the menu.
 - **AI turns**: commands are only intercepted on human input prompts, not during an AI move.
-- **QUIT**: not registered as a UI command (process exit still ends the run).
-- **Terry's playable loop** (factory -> turn -> `CheckWin` / Notakto aggregation / draw) is unchanged aside from history `BoardList` assignment and the LOAD abort path.
+- **QUIT**: registered as a UI command; `QuitGame` prints "Goodbye." and calls `Environment.Exit(0)` so it works from the start menu, setup, or mid-turn prompts.
+- **Terry's playable loop** (factory -> turn -> `CheckWin` / Notakto aggregation / draw) is unchanged aside from history `BoardList` assignment, the LOAD abort path, and the start-menu gate before setup.
 
 ## How to test (once `dotnet` is available)
 
@@ -46,8 +46,9 @@ dotnet build
 dotnet run
 ```
 
-1. Start Numerical Tic-Tac-Toe, human vs human, size 3.
+1. At the start menu choose `1` / `NEW`, then Numerical Tic-Tac-Toe, human vs human, size 3.
 2. Make a few moves; type `HELP`, `SAVE`, `UNDO`, `REDO` at a move prompt.
-3. `SAVE`, quit the process, `dotnet run` again, type `LOAD` at setup (then any number) or during a turn; confirm boards/turn resume.
+3. `SAVE`, then `QUIT`. Run again, choose `2` / `LOAD` at the start menu; confirm boards/turn resume. Also try LOAD mid-turn.
 4. Repeat a quick Notakto undo of a board-killing move and confirm the board is live again.
 5. Confirm Terry's normal win/draw paths still work without using commands.
+6. Confirm `QUIT` from the start menu and from a mid-turn prompt exits cleanly.

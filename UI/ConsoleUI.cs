@@ -24,7 +24,8 @@ public class ConsoleUI {
             ["SAVE"] = new SaveCommand(gameController),
             ["LOAD"] = new LoadCommand(gameController),
             ["UNDO"] = new UndoCommand(gameController),
-            ["REDO"] = new RedoCommand(gameController)
+            ["REDO"] = new RedoCommand(gameController),
+            ["QUIT"] = new QuitCommand(gameController)
         };
     }
 

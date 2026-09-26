@@ -33,3 +33,9 @@ public class RedoCommand : UICommand {
     public RedoCommand(GameController controller) { this.controller = controller; }
     public void Execute() => controller.RedoMove();
 }
+
+public class QuitCommand : UICommand {
+    private readonly GameController controller;
+    public QuitCommand(GameController controller) { this.controller = controller; }
+    public void Execute() => controller.QuitGame();
+}

@@ -15,7 +15,7 @@ public class HumanPlayer : Player
     public Move PromptInput(List<Board> boardList)
     {
         Console.WriteLine($"Player {PlayerNumber}'s turn.");
-        Console.WriteLine("(Type HELP, SAVE, LOAD, UNDO or REDO at any prompt.)");
+        Console.WriteLine("(Type HELP, SAVE, LOAD, UNDO, REDO or QUIT at any prompt.)");
 
         int boardIndex = boardList.Count == 1 ? 0 : PromptForBoard(boardList);
         Board board = boardList[boardIndex];

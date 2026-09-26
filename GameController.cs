@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using System.Linq;
 
 // Terry play loop kept; Kevin wires save/load/undo/help (Slack #assignment-3).
@@ -27,7 +28,7 @@ public sealed class GameController
     public void Run()
     {
         inPlayLoop = false;
-        session = StartNewGame();
+        session = PromptStartMenu();
         inPlayLoop = true;
 
         while (session.Outcome == Result.NotYet)
@@ -46,6 +47,61 @@ public sealed class GameController
         ShowBoards();
         AnnounceOutcome(session.Outcome, session.CurrentPlayerIndex);
         Console.WriteLine($"Game over: {session.Outcome}");
+    }
+
+    // Assignment 2: begin with load-or-fresh before setup prompts.
+    private GameSession PromptStartMenu()
+    {
+        while (true)
+        {
+            Console.WriteLine();
+            Console.WriteLine("=== Start Menu ===");
+            Console.WriteLine("1) New game");
+            Console.WriteLine("2) Load game");
+            Console.WriteLine("(Type 1/NEW, 2/LOAD, HELP, or QUIT)");
+            Console.Write("Choice: ");
+            string? line = Console.ReadLine();
+
+            if (ui.TryHandleCommand(line))
+            {
+                if (pendingLoaded != null)
+                    return ConsumePendingLoaded();
+                continue;
+            }
+
+            string key = (line ?? "").Trim().ToUpperInvariant();
+            if (key == "1" || key == "NEW")
+                return StartNewGame();
+
+            if (key == "2" || key == "LOAD")
+            {
+                if (TryLoadAtStart())
+                    return ConsumePendingLoaded();
+                continue;
+            }
+
+            Console.WriteLine("Please choose 1 (New game) or 2 (Load game).");
+        }
+    }
+
+    // Load via SaveLoadHandler; missing/invalid save stays on the start menu.
+    private bool TryLoadAtStart(string path = DefaultSavePath)
+    {
+        try
+        {
+            LoadGame(path);
+            return pendingLoaded != null;
+        }
+        catch (FileNotFoundException)
+        {
+            Console.WriteLine($"No save file found at '{path}'. Choose New game or try Load again.");
+            return false;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Could not load save: {ex.Message}");
+            return false;
+        }
     }
 
     private GameSession StartNewGame()
@@ -143,7 +199,7 @@ public sealed class GameController
             Console.WriteLine("No game in progress yet. Choose a game to see its rules.");
         }
 
-        Console.WriteLine("Commands: HELP, SAVE, LOAD, UNDO, REDO");
+        Console.WriteLine("Commands: HELP, SAVE, LOAD, UNDO, REDO, QUIT");
         Console.WriteLine($"SAVE/LOAD use '{DefaultSavePath}' in the working directory.");
     }
 
@@ -168,7 +224,7 @@ public sealed class GameController
         if (!inPlayLoop)
         {
             pendingLoaded = loaded;
-            Console.WriteLine("Enter any number at the next setup prompt to continue with the loaded game.");
+            // Start menu consumes pending immediately; mid-setup prompts still check pendingLoaded.
             return;
         }
 
@@ -217,5 +273,12 @@ public sealed class GameController
             (session.CurrentPlayerIndex + 1) % session.Players.Length;
         Console.WriteLine("Move redone.");
         ShowBoards();
+    }
+
+    // Exit the process cleanly from any prompt (setup, start menu, or mid-turn).
+    public void QuitGame()
+    {
+        Console.WriteLine("Goodbye.");
+        Environment.Exit(0);
     }
 }
