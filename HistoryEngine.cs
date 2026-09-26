@@ -19,6 +19,10 @@ public class HistoryEngine
 
     public List<Board>? BoardList { get; set; }
 
+    // Read-only undo/redo stacks for GameStateMapper.Capture.
+    public IReadOnlyList<Move> AppliedMoves => moveHistory;
+    public IReadOnlyList<Move> RedoMoves => redoHistory;
+
     public void RecordMove(Piece piece, Player player, int boardNumber, Point position)
     {
         Move newMove = MoveFactory(piece, player, boardNumber, position);
@@ -31,12 +35,27 @@ public class HistoryEngine
         return new Move(piece, player, boardNumber, position);
     }
 
+    public void ClearHistory()
+    {
+        moveHistory.Clear();
+        redoHistory.Clear();
+    }
+
+    // Replace both stacks for GameStateMapper.Restore.
+    public void ReplaceHistory(IEnumerable<Move> applied, IEnumerable<Move> redo)
+    {
+        moveHistory = new List<Move>(applied);
+        redoHistory = new List<Move>(redo);
+    }
+
     public bool Undo()
     {
         if (BoardList == null || moveHistory.Count == 0) return false;
         Move lastMove = moveHistory[^1];
         Board board = BoardList[lastMove.BoardNumber];
         board.RemovePiece(lastMove.MovePosition);
+        // Notakto: undoing a killing move revives the board (harmless if already live).
+        board.IsLive = true;
         moveHistory.Remove(lastMove);
         redoHistory.Add(lastMove);
         return true;
@@ -48,6 +67,7 @@ public class HistoryEngine
         Move redoMove = redoHistory[^1];
         Board board = BoardList[redoMove.BoardNumber];
         board.SetPiece(redoMove.MyPiece.Value, redoMove.MovePosition);
+        // Redo does not re-run CheckWin (Notakto IsLive; see notes).
         redoHistory.Remove(redoMove);
         moveHistory.Add(redoMove);
         return true;

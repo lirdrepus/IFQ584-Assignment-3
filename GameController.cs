@@ -1,29 +1,46 @@
 using System;
 using System.Linq;
 
-// REMOVED: IGameHistory, IGameUi interface
+// Terry play loop kept; Kevin wires save/load/undo/help (Slack #assignment-3).
 
 public sealed class GameController
 {
+    public const string DefaultSavePath = "save.json";
+
     private readonly GameFactory factory;
     private readonly ConsoleUI ui;
+    private readonly SaveLoadHandler saveLoad;
     private GameSession? session;
+    private GameSession? pendingLoaded;
+    private bool inPlayLoop;
 
-    // REMOVED: SaveLoadHandler and IGameHistory params
-    public GameController(GameFactory factory, ConsoleUI ui)
+    public GameController(GameFactory factory, ConsoleUI ui, SaveLoadHandler saveLoad)
     {
         this.factory = factory;
         this.ui = ui;
+        this.saveLoad = saveLoad;
+        ui.Bind(this);
     }
+
+    public GameSession? Session => session;
 
     public void Run()
     {
+        inPlayLoop = false;
         session = StartNewGame();
+        inPlayLoop = true;
 
         while (session.Outcome == Result.NotYet)
         {
-            ShowBoards();
-            PlayTurn();
+            try
+            {
+                ShowBoards();
+                PlayTurn();
+            }
+            catch (SessionReplacedException)
+            {
+                // Mid-turn LOAD: continue loop with the loaded session.
+            }
         }
 
         ShowBoards();
@@ -33,22 +50,35 @@ public sealed class GameController
 
     private GameSession StartNewGame()
     {
-        // TODO: confirm exact prompt wording/flow ¡ª ConsoleUI only
-        // exposes PromptInteger(prompt) right now, not the SelectGame()/
-        // SelectBoardSizeIfRequired()/SelectComputerMode() methods Kevin's
-        // original IGameUi assumed. Using PromptInteger directly as a stopgap.
         int gameChoice = ui.PromptInteger("Choose a game: 1) Numerical TicTacToe 2) Notakto 3) Gomoku");
+        if (pendingLoaded != null) return ConsumePendingLoaded();
+
         int boardSize = gameChoice == 1
             ? ui.PromptInteger("Enter board size:")
-            : 0; // ignored by Notakto/Gomoku
-        bool computerOpponent = ui.PromptInteger("1) Human vs Human  2) Human vs Computer") == 2;
+            : 0;
+        if (pendingLoaded != null) return ConsumePendingLoaded();
 
-        return factory.Create(gameChoice, boardSize, computerOpponent);
+        bool computerOpponent = ui.PromptInteger("1) Human vs Human  2) Human vs Computer") == 2;
+        if (pendingLoaded != null) return ConsumePendingLoaded();
+
+        GameSession created = factory.Create(gameChoice, boardSize, computerOpponent);
+        HistoryEngine.Instance.ClearHistory();
+        HistoryEngine.Instance.BoardList = created.Boards;
+        return created;
     }
 
-    private void ShowBoards()
+    private GameSession ConsumePendingLoaded()
     {
-        RenderEngine.DrawAll(session!.Boards);
+        GameSession loaded = pendingLoaded!;
+        pendingLoaded = null;
+        HistoryEngine.Instance.BoardList = loaded.Boards;
+        return loaded;
+    }
+
+    public void ShowBoards()
+    {
+        if (session == null) return;
+        RenderEngine.DrawAll(session.Boards);
     }
 
     private void PlayTurn()
@@ -60,11 +90,7 @@ public sealed class GameController
 
         Result outcome = session.Rules.CheckWin(move);
 
-        // Notakto-specific: CheckWin only ever flips IsLive on the board it just
-        // checked and returns NotYet - the "misere" ending (all boards dead) can
-        // only be detected by looking across every board, not from one CheckWin
-        // call. This aggregation has to live here, not in NotaktoRules, since
-        // NotaktoRules.CheckWin only ever sees one board at a time.
+        // Notakto: aggregate dead boards here (CheckWin sees one board only; Terry).
         if (outcome == Result.NotYet && session.Boards.All(b => !b.IsLive))
         {
             outcome = Result.Loss; // the player who just moved loses (misere rule)
@@ -87,10 +113,7 @@ public sealed class GameController
         session.CurrentPlayerIndex = (session.CurrentPlayerIndex + 1) % session.Players.Length;
     }
 
-    // Result is expressed relative to the player who just moved (Win = mover
-    // wins, Loss = mover loses - this is what lets NotaktoRules flip the
-    // semantics polymorphically without Game knowing it's Notakto). This method
-    // is where that gets translated into a message naming the actual winner.
+    // Outcome is relative to the mover (Notakto flips Win/Loss); name the real winner here (Terry).
     private void AnnounceOutcome(Result outcome, int moverIndex)
     {
         int moverPlayerNumber = session!.Players[moverIndex].PlayerNumber;
@@ -108,5 +131,91 @@ public sealed class GameController
         return session!.Boards.All(board => board.GetAvaliableSpaces().Count == 0);
     }
 
-    // REMOVED: HandleCommand() switch for SAVE/LOAD/UNDO/REDO/HELP/QUIT
+    public void ShowHelp()
+    {
+        if (session != null)
+        {
+            Console.WriteLine($"--- {session.Rules.GameName} ---");
+            Console.WriteLine(session.Rules.GameDescription);
+        }
+        else
+        {
+            Console.WriteLine("No game in progress yet. Choose a game to see its rules.");
+        }
+
+        Console.WriteLine("Commands: HELP, SAVE, LOAD, UNDO, REDO");
+        Console.WriteLine($"SAVE/LOAD use '{DefaultSavePath}' in the working directory.");
+    }
+
+    public void SaveGame(string path = DefaultSavePath)
+    {
+        if (session == null)
+        {
+            Console.WriteLine("Nothing to save. Start or load a game first.");
+            return;
+        }
+
+        saveLoad.Save(path, session);
+        Console.WriteLine($"Game saved to {path}.");
+    }
+
+    public void LoadGame(string path = DefaultSavePath)
+    {
+        GameSession loaded = saveLoad.Load(path);
+        HistoryEngine.Instance.BoardList = loaded.Boards;
+        Console.WriteLine($"Game loaded from {path}.");
+
+        if (!inPlayLoop)
+        {
+            pendingLoaded = loaded;
+            Console.WriteLine("Enter any number at the next setup prompt to continue with the loaded game.");
+            return;
+        }
+
+        session = loaded;
+        ShowBoards();
+        throw new SessionReplacedException();
+    }
+
+    public void UndoMove()
+    {
+        if (session == null)
+        {
+            Console.WriteLine("No active game.");
+            return;
+        }
+
+        if (!HistoryEngine.Instance.Undo())
+        {
+            Console.WriteLine("There is no move to undo.");
+            return;
+        }
+
+        // Undo returns the turn to the mover after PlayTurn advanced the index.
+        session.CurrentPlayerIndex =
+            (session.CurrentPlayerIndex - 1 + session.Players.Length) % session.Players.Length;
+        session.Outcome = Result.NotYet;
+        Console.WriteLine("Move undone.");
+        ShowBoards();
+    }
+
+    public void RedoMove()
+    {
+        if (session == null)
+        {
+            Console.WriteLine("No active game.");
+            return;
+        }
+
+        if (!HistoryEngine.Instance.Redo())
+        {
+            Console.WriteLine("There is no move to redo.");
+            return;
+        }
+
+        session.CurrentPlayerIndex =
+            (session.CurrentPlayerIndex + 1) % session.Players.Length;
+        Console.WriteLine("Move redone.");
+        ShowBoards();
+    }
 }

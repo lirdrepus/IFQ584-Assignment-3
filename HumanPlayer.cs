@@ -15,6 +15,7 @@ public class HumanPlayer : Player
     public Move PromptInput(List<Board> boardList)
     {
         Console.WriteLine($"Player {PlayerNumber}'s turn.");
+        Console.WriteLine("(Type HELP, SAVE, LOAD, UNDO or REDO at any prompt.)");
 
         int boardIndex = boardList.Count == 1 ? 0 : PromptForBoard(boardList);
         Board board = boardList[boardIndex];
@@ -27,14 +28,26 @@ public class HumanPlayer : Player
         return new Move(piece, this, boardIndex, space);
     }
 
+    // Cecil prompts kept; route UI commands so LOAD can abort via SessionReplacedException.
+    private static string? ReadLineAllowingCommands()
+    {
+        while (true)
+        {
+            string? line = Console.ReadLine();
+            if (ConsoleUI.TryHandleActiveCommand(line))
+                continue;
+            return line;
+        }
+    }
+
     private int PromptForBoard(List<Board> boardList)
     {
         while (true)
         {
-            Console.Write($"Choose a board (1-{boardList.Count}): "); 
-            if (int.TryParse(Console.ReadLine(), out int input)
+            Console.Write($"Choose a board (1-{boardList.Count}): ");
+            if (int.TryParse(ReadLineAllowingCommands(), out int input)
                 && input >= 1 && input <= boardList.Count
-                && boardList[input - 1].IsLive)   
+                && boardList[input - 1].IsLive)
                 return input - 1;
             Console.WriteLine("That board isn't in play. Try again.");
         }
@@ -45,7 +58,7 @@ public class HumanPlayer : Player
         while (true)
         {
             Console.Write("Enter column and row (e.g. \"1 2\"): ");
-            var parts = (Console.ReadLine() ?? "").Split(' ');
+            var parts = (ReadLineAllowingCommands() ?? "").Split(' ');
 
             if (parts.Length == 2 && int.TryParse(parts[0], out int x) && int.TryParse(parts[1], out int y))
             {
@@ -75,9 +88,7 @@ public class HumanPlayer : Player
         }
     }
 
-    // Notakto/Gomoku don't assign pieces per player (AvailablePieces returns
-    // empty for them) - infer from the pool instead: one distinct value =
-    // shared piece (Notakto's X); two = alternate by player number (Gomoku's X/O).
+    // Notakto/Gomoku: infer piece from pool when AvailablePieces is empty (Cecil).
     private int PromptForValue(Board board)
     {
         var eligible = Rules.AvailablePieces(PlayerNumber);
@@ -93,7 +104,7 @@ public class HumanPlayer : Player
         while (true)
         {
             Console.Write($"Choose a number ({string.Join(", ", eligible.Select(p => p.Value))}): ");
-            if (int.TryParse(Console.ReadLine(), out int value) && eligible.Any(p => p.Value == value))
+            if (int.TryParse(ReadLineAllowingCommands(), out int value) && eligible.Any(p => p.Value == value))
                 return value;
             Console.WriteLine("That number isn't yours to play. Try again.");
         }

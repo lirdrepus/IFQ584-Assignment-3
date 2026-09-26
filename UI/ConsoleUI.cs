@@ -1,46 +1,78 @@
 using System.Drawing;
 
+// Sean ConsoleUI kept; Bind fills empty command stubs (Slack #assignment-3).
 public class ConsoleUI {
-    
 
+    // Sean command strategy map (filled in Bind).
+    private Dictionary<string, UICommand> CommandStrategies = new();
+    private GameController? controller;
 
-    public int PromptInteger(string prompt){ //Allows for caller to give a prompt to player
-        bool incomplete = true;    //The argument allows a "prompt" to be displayed to the player
+    // Active UI so HumanPlayer can route SAVE/UNDO without a UI ref.
+    public static ConsoleUI? Active { get; private set; }
+
+    public ConsoleUI()
+    {
+        Active = this;
+    }
+
+    public void Bind(GameController gameController)
+    {
+        controller = gameController;
+        CommandStrategies = new Dictionary<string, UICommand>
+        {
+            ["HELP"] = new HelpCommand(gameController),
+            ["SAVE"] = new SaveCommand(gameController),
+            ["LOAD"] = new LoadCommand(gameController),
+            ["UNDO"] = new UndoCommand(gameController),
+            ["REDO"] = new RedoCommand(gameController)
+        };
+    }
+
+    // Prompt the player for an integer.
+    public int PromptInteger(string prompt){
+        bool incomplete = true;
         int chosenNumber = 0;
         Console.WriteLine(prompt);
         while (incomplete){
             try{
                 string input = PlayerInput();
-                chosenNumber = System.Convert.ToInt32(input);} //Grabbing player input and converting it to an integer
+                chosenNumber = System.Convert.ToInt32(input);}
             catch{
                 Console.WriteLine("Invalid input detected. Please follow the instructions and try again.");
-                continue;} //If the player enters non-integer input we re-prompt them.
+                continue;}
             incomplete = false;}
         return chosenNumber;}
 
-        private Dictionary<string, UICommand> CommandStrategies = new(){
-        ["HELP"] = new HelpCommand(), //Strategy pattern to allow user to select various commands
-        ["SAVE"] = new SaveCommand(),
-        ["LOAD"] = new LoadCommand()
-        };
-        private string PlayerInput(){ //Allows for player to input commands or seek help.
-            bool incomplete = true;
-            string input = "";
-            while (incomplete){
-                Console.Write("Input:");
-                input = Console.ReadLine();
-                UICommand command; //Checking Strategy to see if a command was entered.
-                if(CommandStrategies.TryGetValue(input, out command!)){
-                    command.Execute(); //Command is executed
-                    continue; //Input resumes after command execution
-                }
-                incomplete = false;
-            }
-            return input;
-            
-
+    public bool TryHandleCommand(string? input)
+    {
+        if (string.IsNullOrWhiteSpace(input)) return false;
+        string key = input.Trim().ToUpperInvariant();
+        if (CommandStrategies.TryGetValue(key, out UICommand? command))
+        {
+            command.Execute();
+            return true;
         }
+        return false;
     }
 
+    public static bool TryHandleActiveCommand(string? input)
+    {
+        return Active != null && Active.TryHandleCommand(input);
+    }
 
-
+    // Read input; run a UI command if matched, else return the value.
+    private string PlayerInput(){
+        bool incomplete = true;
+        string input = "";
+        while (incomplete){
+            Console.Write("Input:");
+            input = Console.ReadLine() ?? "";
+            if (TryHandleCommand(input))
+            {
+                continue;
+            }
+            incomplete = false;
+        }
+        return input;
+    }
+}
