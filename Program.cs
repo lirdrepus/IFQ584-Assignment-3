@@ -1,10 +1,7 @@
-﻿// Program.cs
-// REMOVED: the original top-level statements (Console.Clear(); NumericalTicTacToe ttt = ...)
-// — that was the old A1 entry point, replaced by GameController now that Rules/
-// GameFactory exist. Also removes the class-name clash with Kevin's
-// `public static class Program { public static void Run(...) }`.
+// Boot GameController with SaveLoadHandler + GameStateMapper (Kevin / Slack #assignment-3).
 
 var factory = new GameFactory();
 var ui = new ConsoleUI();
-var controller = new GameController(factory, ui);
+var saveLoad = new SaveLoadHandler(new GameStateMapper());
+var controller = new GameController(factory, ui, saveLoad);
 controller.Run();

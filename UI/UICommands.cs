@@ -3,33 +3,39 @@ public interface UICommand {
     void Execute();
 }
 
-//TODO: Implement commands
+// Sean UICommand stubs filled in-place (Slack #assignment-3 / Naveed; Sean exited).
 public class HelpCommand : UICommand {
-    public void Execute(){
-        return;
-    }
+    private readonly GameController controller;
+    public HelpCommand(GameController controller) { this.controller = controller; }
+    public void Execute() => controller.ShowHelp();
 }
 
 public class SaveCommand : UICommand {
-    public void Execute() {
-        return;
-    }
+    private readonly GameController controller;
+    public SaveCommand(GameController controller) { this.controller = controller; }
+    public void Execute() => controller.SaveGame();
 }
 
 public class LoadCommand : UICommand {
-    public void Execute(){
-        return;
-    }
+    private readonly GameController controller;
+    public LoadCommand(GameController controller) { this.controller = controller; }
+    public void Execute() => controller.LoadGame();
 }
 
-public class UndoCommand : UICommand{
-    public void Execute(){
-        HistoryEngine.Instance?.Undo();
-    }
+public class UndoCommand : UICommand {
+    private readonly GameController controller;
+    public UndoCommand(GameController controller) { this.controller = controller; }
+    public void Execute() => controller.UndoMove();
 }
 
-public class RedoCommand : UICommand{
-    public void Execute(){
-        HistoryEngine.Instance?.Redo();
-    }
+public class RedoCommand : UICommand {
+    private readonly GameController controller;
+    public RedoCommand(GameController controller) { this.controller = controller; }
+    public void Execute() => controller.RedoMove();
+}
+
+public class QuitCommand : UICommand {
+    private readonly GameController controller;
+    public QuitCommand(GameController controller) { this.controller = controller; }
+    public void Execute() => controller.QuitGame();
 }
